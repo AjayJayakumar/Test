@@ -23,7 +23,7 @@ class AddingNewTextSnippet(APIView):
         response_data = {}
         data = {
             'title': request.data.get('title'), 
-            'created_user': request.data.get('created_user')
+            'created_by': request.data.get('created_user')
         }
         serializer = TextSnippetSerializer(data=data)
         if serializer.is_valid():
@@ -40,7 +40,7 @@ class AddingNewTextSnippet(APIView):
 
         return Response(response_data, status=resp_status)
        
-       
+
 # Get Text Snippet Details           
 class GetTextSnippet(APIView):
     
@@ -70,3 +70,5 @@ class GetTextSnippet(APIView):
                 resp_status = status.HTTP_400_BAD_REQUEST
 
         return Response(response_data, status=resp_status)
+
+
