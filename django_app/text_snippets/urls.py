@@ -15,6 +15,7 @@ urlpatterns = [
   path("text-snippet/add",AddingNewTextSnippet.as_view()),
   path("text-snippet/get/<int:pk>/",GetTextSnippet.as_view()),
   path("text-snippet/update/",UpdatingTextSnippet.as_view()),
+  path("text-snippet/delete/",DeletingTextSnippet.as_view()),
 ]
 
 urlpatterns += router.urls

@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -213,9 +214,10 @@ class GetAllTextSnippets(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         response_data = {}
         queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.filter(is_deleted = False)
         queryset = queryset.order_by('id')
         serializer = self.get_serializer(queryset, many=True)
-        count = TextSnippets.objects.count()
+        count = queryset.count()
         data = serializer.data
         if data:
             response_data = {
@@ -236,3 +238,33 @@ class GetAllTextSnippets(viewsets.ModelViewSet):
         }
         return Response(response_data)
 
+
+
+# Soft-Deleting Text Snippet Details     
+class DeletingTextSnippet(APIView):
+    serializer_class = TextSnippetSerializer
+
+    def put(self, request, *args, **kwargs):
+
+        response_data = {}
+
+        
+        pk = int(request.data["id"])
+        text_snippet_obj = TextSnippets.objects.filter(id=pk).first()
+        if text_snippet_obj:
+            
+            update_query = TextSnippets.objects.get(id=pk)
+            update_query.is_deleted = True
+            update_query.save()
+            response_data['status_code'] = 200
+            response_data['status'] = True
+            response_data['message'] = "Text Snippet Deleted Successfully"
+            resp_status = status.HTTP_200_OK
+            
+        else :
+            response_data['status_code'] = "400"
+            response_data['status'] = False
+            response_data['message'] = 'Text Snippet not Deleted '
+            resp_status = status.HTTP_400_BAD_REQUEST
+
+        return Response(response_data, resp_status)
