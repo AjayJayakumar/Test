@@ -53,7 +53,7 @@ class GetTextSnippet(APIView):
             retrieved_data = {
             'title': data_to_view.values_list('title'), 
             'created_time': data_to_view.values_list('created_time'),
-            'created_user': data_to_view.values_list('created_by_id')
+            'created_user': data_to_view.values_list('created_by')
             }
 
             data = retrieved_data
@@ -71,4 +71,37 @@ class GetTextSnippet(APIView):
 
         return Response(response_data, status=resp_status)
 
+
+# Update Text Snippet Details     
+class UpdatingTextSnippet(APIView):
+    serializer_class = TextSnippetSerializer
+
+    def put(self, request, *args, **kwargs):
+
+        response_data = {}
+
+        
+        pk = int(request.data["id"])
+        title = request.data["title"]
+        created_by = request.data["created_user"]
+        text_snippet_obj = TextSnippets.objects.filter(id=pk).first()
+        if text_snippet_obj:
+            
+            user = User.objects.get(id=created_by)
+            update_query = TextSnippets.objects.get(id=pk)
+            update_query.title = title
+            update_query.created_by = user
+            update_query.save()
+            response_data['status_code'] = 200
+            response_data['status'] = True
+            response_data['data'] = "Text Snippet Updated Successfully"
+            resp_status = status.HTTP_200_OK
+            
+        else :
+            response_data['status_code'] = "400"
+            response_data['status'] = False
+            response_data['message'] = 'Text Snippet not Updated '
+            resp_status = status.HTTP_400_BAD_REQUEST
+
+        return Response(response_data, resp_status)
 
