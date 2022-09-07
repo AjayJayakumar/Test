@@ -3,8 +3,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import TextSnippets
-from .serializers import NewUserSerializer, TextSnippetSerializer
+from .models import TextSnippets,Tag
+from .serializers import NewUserSerializer, TagSerializer, TextSnippetSerializer
 from django.contrib.auth.models import User
 from rest_framework import generics,status,viewsets
 
@@ -15,6 +15,28 @@ from rest_framework import generics,status,viewsets
 class NewUserAPIView(generics.CreateAPIView):
   permission_classes = (AllowAny,)
   serializer_class = NewUserSerializer
+
+# Adding New Tag
+class AddingNewTag(APIView):
+    def post(self,request):
+        response_data = {}
+        data = {
+            'tag': request.data.get('tag'), 
+        }
+        serializer = TagSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response_data['status_code'] = '200'
+            response_data['status'] = True
+            response_data['message'] = 'Tag is added successfully. '
+            resp_status = status.HTTP_200_OK
+        else:
+            response_data['status_code'] = '400'
+            response_data['status'] = False
+            response_data['message'] = 'Invalid Data, Tag is not added'
+            resp_status = status.HTTP_400_BAD_REQUEST
+
+        return Response(response_data, status=resp_status)
 
 
 # Adding New text snippet
@@ -40,6 +62,71 @@ class AddingNewTextSnippet(APIView):
 
         return Response(response_data, status=resp_status)
        
+
+# Get Tag Details           
+class GetTag(APIView):
+    
+    def get(self,request,pk):
+        response_data = {}
+        data = {}
+        data_to_view = Tag.objects.filter(id=pk)
+        print(data_to_view)
+        if data_to_view:
+            retrieved_data = {
+            'id': data_to_view.values_list('id'), 
+            'tag': data_to_view.values_list('tag')
+            }
+
+            data = retrieved_data
+            if data:
+                response_data['status_code'] = '200'
+                response_data['status'] = True
+                response_data['message'] = 'Tag Details fetched. '
+                response_data['data'] = data
+                resp_status = status.HTTP_200_OK
+            else:
+                response_data['status_code'] = '400'
+                response_data['status'] = False
+                response_data['message'] = 'Tag Details not fetched.'
+                resp_status = status.HTTP_400_BAD_REQUEST
+
+        return Response(response_data, status=resp_status)
+
+# Getting all Tag Details and Count
+class GetAllTags(viewsets.ModelViewSet):
+
+    serializer_class = TagSerializer
+    def get_queryset(self):
+        queryset = Tag.objects.all()
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        response_data = {}
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.order_by('id')
+        serializer = self.get_serializer(queryset, many=True)
+        count = Tag.objects.count()
+        data = serializer.data
+        if data:
+            response_data = {
+            "status_code": "200",
+            "status": True,
+            "message": 'Tag List',
+            "total count": count,
+            "data": data,
+            "status" : 'HTTP_200_OK'
+        }
+        
+        else:
+            response_data = {
+            "status_code": "400",
+            "status": False,
+            "message": 'No Data Found',
+            "status" : 'HTTP_400_BAD_REQUEST'
+        }
+        return Response(response_data)
+
+
 
 # Get Text Snippet Details           
 class GetTextSnippet(APIView):

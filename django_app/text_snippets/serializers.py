@@ -45,6 +45,13 @@ class NewUserSerializer(serializers.ModelSerializer):
     return user
 
 
+# Serializer for Tag
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id','tag')
+
 # Serializer for Text Snippets
 class TextSnippetSerializer(serializers.ModelSerializer):
 
