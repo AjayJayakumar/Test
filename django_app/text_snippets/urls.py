@@ -4,7 +4,7 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-# router.register('text-snippet/get',views.GetTextSnippetViewset, basename='provider-suspence-account')
+router.register('text-snippet/view',views.GetAllTextSnippets, basename='get-all-text-snippets')
 
 
 urlpatterns = [

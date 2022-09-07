@@ -94,7 +94,7 @@ class UpdatingTextSnippet(APIView):
             update_query.save()
             response_data['status_code'] = 200
             response_data['status'] = True
-            response_data['data'] = "Text Snippet Updated Successfully"
+            response_data['message'] = "Text Snippet Updated Successfully"
             resp_status = status.HTTP_200_OK
             
         else :
@@ -105,3 +105,37 @@ class UpdatingTextSnippet(APIView):
 
         return Response(response_data, resp_status)
 
+
+# Getting all Text Snippet Details and Count
+class GetAllTextSnippets(viewsets.ModelViewSet):
+
+    serializer_class = TextSnippetSerializer
+    def get_queryset(self):
+        queryset = TextSnippets.objects.all()
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        response_data = {}
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.order_by('id')
+        serializer = self.get_serializer(queryset, many=True)
+        count = TextSnippets.objects.count()
+        data = serializer.data
+        if data:
+            response_data = {
+            "status_code": "200",
+            "status": True,
+            "message": 'Text Snippets List',
+            "total count": count,
+            "data": data,
+            "status" : 'HTTP_200_OK'
+        }
+        
+        else:
+            response_data = {
+            "status_code": "400",
+            "status": False,
+            "message": 'No Data Found',
+            "status" : 'HTTP_400_BAD_REQUEST'
+        }
+        return Response(response_data)
