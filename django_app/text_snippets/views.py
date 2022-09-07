@@ -198,8 +198,17 @@ class GetAllTextSnippets(viewsets.ModelViewSet):
 
     serializer_class = TextSnippetSerializer
     def get_queryset(self):
-        queryset = TextSnippets.objects.all()
-        return queryset
+
+        # Filtering the list of text snippets under a particular tag name
+        title_tag = self.request.query_params.get('tag', None)
+        if title_tag:
+            queryset = TextSnippets.objects.filter(title = title_tag)
+            return queryset
+
+        # If All list of text snippets is needed
+        else:
+            queryset = TextSnippets.objects.all()
+            return queryset
 
     def list(self, request, *args, **kwargs):
         response_data = {}
@@ -226,3 +235,4 @@ class GetAllTextSnippets(viewsets.ModelViewSet):
             "status" : 'HTTP_400_BAD_REQUEST'
         }
         return Response(response_data)
+
